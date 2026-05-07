@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>测试表单｜万能二维码模板填充</title>
+  <style>
+    *{box-sizing:border-box}body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#edf4fb,#f8fbff);min-height:100vh;margin:0;display:grid;place-items:center;color:#0f172a}.card{background:rgba(255,255,255,.98);padding:30px;border-radius:22px;box-shadow:0 22px 60px rgba(15,23,42,.16);width:min(520px,calc(100vw - 32px));border:1px solid #dbe5f0}.brand{display:flex;align-items:center;gap:14px;margin-bottom:18px}.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#2f7df6,#1463e8);display:grid;place-items:center;color:white}h2{margin:0;font-size:26px}.desc{margin:3px 0 0;color:#64748b;font-size:14px;font-weight:600}label{display:grid;gap:8px;margin:14px 0;font-weight:800;font-size:14px;color:#101828}input,textarea,select{padding:13px 14px;border:1px solid #cbd5e1;border-radius:13px;outline:none;font-size:15px;background:#fff}input:focus,textarea:focus,select:focus{border-color:#60a5fa;box-shadow:0 0 0 4px rgba(59,130,246,.13)}textarea{min-height:88px;resize:vertical}button{width:100%;margin-top:15px;padding:14px;border:0;border-radius:13px;background:linear-gradient(135deg,#2378ff,#0f63ee);color:white;font-weight:850;cursor:pointer;font-size:15px}.copyright{margin-top:20px;padding-top:14px;border-top:1px solid #e2e8f0;text-align:center;color:#94a3b8;font-size:11px;line-height:1.6}
+  </style>
+</head>
+<body>
+  <form class="card" id="demoForm">
+    <div class="brand"><div class="logo">QR</div><div><h2>测试表单</h2><p class="desc">用于测试模板点选、QRFILL1 生成与扫码自动填充。</p></div></div>
+    <label>检测状态<input id="status" placeholder="检测状态"></label>
+    <label>号牌号码<input name="plateNo" placeholder="号牌号码"></label>
+    <label>姓名<input name="name" placeholder="姓名"></label>
+    <label>手机号<input name="phone" placeholder="手机号"></label>
+    <label>城市<select name="city"><option value="">请选择</option><option>上海</option><option>北京</option><option>广州</option><option>深圳</option></select></label>
+    <label>地址<textarea name="address" placeholder="地址"></textarea></label>
+    <button type="button" onclick="alert(JSON.stringify(Object.fromEntries(new FormData(document.querySelector('#demoForm'))), null, 2))">查看提交数据</button>
+    <div class="copyright">© 2026 Visual QR Template Filler. All rights reserved.<br>仅在本地浏览器保存模板。</div>
+  </form>
+</body>
+</html>
