@@ -6,6 +6,7 @@
 
   const STATE_KEY = '__qrfill_ascii_templates_v1__';
   const PANEL_POS_KEY = '__qrfill_ascii_panel_position_v1__';
+  const PANEL_SIZE_KEY = '__qrfill_ascii_panel_size_v1__';
   const SETTINGS_KEY = '__qrfill_settings_v1__';
   const panelId = 'qrfill-ascii-panel';
   const APP_VERSION = '1.0';
@@ -598,10 +599,15 @@
   const style = document.createElement('style');
   style.textContent = `
     .__qrfill_selected__{outline:none!important;outline-offset:0!important;box-shadow:none!important;background:transparent!important;background-image:none!important;border-color:inherit!important;}
-    #${panelId}{position:fixed;z-index:2147483647;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,calc(100vw - 40px));max-height:88vh;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(250,253,255,.96));border-radius:18px;box-shadow:0 22px 70px rgba(15,23,42,.22);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#0f172a;border:1px solid rgba(203,213,225,.9);user-select:none;backdrop-filter:blur(10px)}
+    #${panelId}{position:fixed;z-index:2147483647;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,calc(100vw - 40px));max-height:88vh;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(250,253,255,.96));border-radius:18px;box-shadow:0 22px 70px rgba(15,23,42,.22);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#0f172a;border:1px solid rgba(203,213,225,.9);user-select:none;backdrop-filter:blur(10px);min-width:320px;min-height:200px;display:flex;flex-direction:column}
+    #${panelId} .resize-handle{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;z-index:10;opacity:0;transition:opacity .2s}
+    #${panelId}:hover .resize-handle{opacity:1}
+    #${panelId} .resize-handle::after{content:'';position:absolute;right:4px;bottom:4px;width:10px;height:10px;border-right:2.5px solid #94a3b8;border-bottom:2.5px solid #94a3b8;border-radius:0 0 3px 0}
+    #${panelId} .resize-handle:hover::after{border-color:#2563eb}
+    #${panelId}.resizing{opacity:.95;transition:none}
     #${panelId}.dragging{opacity:.97;box-shadow:0 26px 76px rgba(15,23,42,.26)}
     #${panelId} *{box-sizing:border-box}
-    #${panelId} .hd{padding:18px 20px 14px;display:flex;justify-content:space-between;align-items:flex-start;background:rgba(255,255,255,.62);cursor:move;touch-action:none;position:sticky;top:0;z-index:2;border-bottom:1px solid rgba(226,232,240,.72)}
+    #${panelId} .hd{padding:18px 20px 14px;display:flex;justify-content:space-between;align-items:flex-start;background:rgba(255,255,255,.62);cursor:move;touch-action:none;position:sticky;top:0;z-index:2;border-bottom:1px solid rgba(226,232,240,.72);flex:0 0 auto}
     #${panelId} .brand{display:flex;align-items:center;gap:12px;min-width:0}
     #${panelId} .logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#2f7df6,#1463e8);box-shadow:0 10px 24px rgba(22,99,232,.32);display:grid;place-items:center;color:white;flex:0 0 auto}
     #${panelId} .logo svg{width:24px;height:24px}
@@ -610,7 +616,7 @@
     #${panelId} .dragHint{font-size:11px;color:#64748b;font-weight:600}
     #${panelId} #qrClose{cursor:pointer;width:auto;min-width:110px;background:#f8fafc;color:#1e293b;border:1px solid #cbd5e1;border-radius:13px;padding:10px 14px;font-size:13px;box-shadow:0 6px 18px rgba(15,23,42,.06)}
     #${panelId} #qrClose:hover{background:#eef6ff;border-color:#93c5fd;color:#0f172a}
-    #${panelId} .bd{padding:16px 20px 18px;display:grid;gap:12px;max-height:calc(92vh - 98px);overflow:auto;background:rgba(248,250,252,.55)}
+    #${panelId} .bd{padding:16px 20px 18px;display:grid;gap:12px;overflow:auto;background:rgba(248,250,252,.55);flex:1;min-height:0}
     #${panelId} .section{display:grid;gap:12px}
     #${panelId} .sectionTitle{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800;color:#101828;margin:2px 0 0}
     #${panelId} .sectionTitle svg{width:20px;height:20px;color:#1e293b;flex:0 0 auto}
@@ -713,7 +719,7 @@
         <div class="logo" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M15 15h2v2h-2zM19 15h1v5h-5v-1M14 19v1"/></svg>
         </div>
-        <div class="titleBox"><div class="title">表单填充助手</div><div class="dragHint">按住这里可拖动面板</div></div>
+        <div class="titleBox"><div class="title">表单填充助手</div><div class="dragHint">拖动标题栏移动 · 右下角拖拽调整大小</div></div>
       </div>
       <button class="secondary" id="qrClose">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -786,7 +792,8 @@
         </details>
         <div class="copyright">© 2026 表单填充助手. All rights reserved.<br>仅在本地浏览器保存模板，请勿在不可信页面使用敏感数据。</div>
       </div>
-    </div>`;
+    </div>
+    <div class="resize-handle" id="qrfillResizeHandle"></div>`;
   document.body.appendChild(panel);
 
   function clampPanelPosition(left, top) {
@@ -806,6 +813,27 @@
 
   function loadPanelPosition() {
     try { return JSON.parse(localStorage.getItem(PANEL_POS_KEY) || 'null'); } catch { return null; }
+  }
+
+  function savePanelSize(width, height) {
+    try { localStorage.setItem(PANEL_SIZE_KEY, JSON.stringify({ width, height })); } catch {}
+  }
+
+  function loadPanelSize() {
+    try { return JSON.parse(localStorage.getItem(PANEL_SIZE_KEY) || 'null'); } catch { return null; }
+  }
+
+  function applyPanelSize(size) {
+    if (!size) return;
+    const minW = 320, minH = 200;
+    const maxW = window.innerWidth - 40;
+    const maxH = window.innerHeight * 0.88;
+    if (size.width) panel.style.width = Math.min(Math.max(size.width, minW), maxW) + 'px';
+    if (size.height) {
+      const h = Math.min(Math.max(size.height, minH), maxH);
+      panel.style.maxHeight = h + 'px';
+      panel.style.height = h + 'px';
+    }
   }
 
   function applyPanelPosition(pos) {
@@ -863,11 +891,65 @@
 
     handle.addEventListener('pointerup', stopDrag);
     handle.addEventListener('pointercancel', stopDrag);
-    window.addEventListener('resize', () => applyPanelPosition(loadPanelPosition()));
+    window.addEventListener('resize', () => {
+      applyPanelPosition(loadPanelPosition());
+      applyPanelSize(loadPanelSize());
+    });
+  }
+
+  function enablePanelResize() {
+    const handle = panel.querySelector('#qrfillResizeHandle');
+    if (!handle) return;
+    let resizing = false;
+    let startX = 0, startY = 0, startW = 0, startH = 0;
+
+    handle.addEventListener('pointerdown', (e) => {
+      resizing = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = panel.getBoundingClientRect();
+      startW = rect.width;
+      startH = rect.height;
+      panel.style.left = rect.left + 'px';
+      panel.style.top = rect.top + 'px';
+      panel.style.transform = 'none';
+      panel.classList.add('resizing');
+      if (handle.setPointerCapture) handle.setPointerCapture(e.pointerId);
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    handle.addEventListener('pointermove', (e) => {
+      if (!resizing) return;
+      const minW = 320, minH = 200;
+      const maxW = window.innerWidth - 40;
+      const maxH = window.innerHeight * 0.88;
+      const newW = Math.min(Math.max(startW + e.clientX - startX, minW), maxW);
+      const newH = Math.min(Math.max(startH + e.clientY - startY, minH), maxH);
+      panel.style.width = newW + 'px';
+      panel.style.height = newH + 'px';
+      panel.style.maxHeight = newH + 'px';
+      e.preventDefault();
+    });
+
+    function stopResize(e) {
+      if (!resizing) return;
+      resizing = false;
+      panel.classList.remove('resizing');
+      const rect = panel.getBoundingClientRect();
+      savePanelSize(rect.width, rect.height);
+      applyPanelPosition(clampPanelPosition(rect.left, rect.top));
+      try { if (handle.releasePointerCapture) handle.releasePointerCapture(e.pointerId); } catch {}
+    }
+
+    handle.addEventListener('pointerup', stopResize);
+    handle.addEventListener('pointercancel', stopResize);
   }
 
   applyPanelPosition(loadPanelPosition());
   enablePanelDrag();
+  enablePanelResize();
+  applyPanelSize(loadPanelSize());
   // 默认隐藏：刷新页面后只恢复扫码监听，不打扰页面；点击插件图标再显示面板。
   panel.style.display = 'none';
 
@@ -1650,7 +1732,7 @@
       panel.style.display = 'block';
       renderTemplates();
       applyPanelPosition(loadPanelPosition());
-      // 加载设置并更新UI
+      applyPanelSize(loadPanelSize());
       loadSettings();
       panel.querySelector('#serviceUrl').value = serviceUrl;
       panel.querySelector('#pollInterval').value = pollInterval;
@@ -1666,6 +1748,8 @@
       panel.style.display = willShow ? 'block' : 'none';
       if (willShow) {
         renderTemplates();
+        applyPanelPosition(loadPanelPosition());
+        applyPanelSize(loadPanelSize());
         loadSettings();
         panel.querySelector('#serviceUrl').value = serviceUrl;
         panel.querySelector('#pollInterval').value = pollInterval;
