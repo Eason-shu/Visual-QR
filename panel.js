@@ -105,7 +105,11 @@
     if (!historyList) return;
 
     if (history.length === 0) {
-      historyList.innerHTML = `<div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">暂无填充历史记录</div>`;
+      historyList.innerHTML = `<div class="history-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <div>暂无填充历史记录</div>
+        <div class="hint">扫码填充后会在这里显示记录</div>
+      </div>`;
       return;
     }
 
@@ -114,48 +118,53 @@
         (item) => `
       <div class="history-item" data-id="${item.id}">
         <div class="history-header">
-          <div class="history-time">${formatTime(item.timestamp)}</div>
-          <div class="history-status ${item.success ? "success" : "failed"}">${item.success ? "✓ 成功" : "✗ 失败"}</div>
+          <div class="history-time">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${formatTime(item.timestamp)}
+          </div>
+          <div class="history-status ${item.success ? "success" : "failed"}">
+            ${item.success ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}
+            ${item.success ? "成功" : "失败"}
+          </div>
         </div>
         <div class="history-summary">${item.message}</div>
         <div class="history-meta">
-          <span class="history-duration">耗时: ${formatDuration(item.duration)}</span>
-          ${item.template ? `<span class="history-template">模板: ${item.template.name}</span>` : ""}
+          <span class="history-duration">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${formatDuration(item.duration)}
+          </span>
+          ${item.template ? `<span class="history-template">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            ${item.template.name}
+          </span>` : ""}
         </div>
         <div class="history-fields">
           ${item.fields
             .map(
               (field) => `
             <div class="history-field">
-              <span class="field-key">${field.key}</span>
-              <span class="field-status ${field.status === "成功" ? "success" : field.status === "失败" ? "failed" : "skipped"}">${field.status}</span>
+              <span class="field-key">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                ${field.key}
+              </span>
+              <span class="field-status ${field.status === "成功" ? "success" : field.status === "失败" ? "failed" : "skipped"}">
+                ${field.status === "成功" ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' : field.status === "失败" ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>'}
+                ${field.status}
+              </span>
               <span class="field-value">${field.msg}</span>
-              ${field.duration !== undefined ? `<span class="field-duration">${formatDuration(field.duration)}</span>` : ""}
+              ${field.duration !== undefined ? `<span class="field-duration">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${formatDuration(field.duration)}
+              </span>` : ""}
             </div>
           `,
             )
             .join("")}
         </div>
-        <div class="history-actions">
-          <button class="history-action-btn" onclick="copyHistoryPayload('${item.id}')">📋 复制原始数据</button>
-        </div>
       </div>
     `,
       )
       .join("");
-  }
-  function copyHistoryPayload(id) {
-    const item = history.find((h) => h.id === id);
-    if (item) {
-      navigator.clipboard
-        .writeText(JSON.stringify(item.payload, null, 2))
-        .then(() => {
-          toast("已复制", "原始 payload 已复制到剪贴板");
-        })
-        .catch(() => {
-          toast("复制失败", "无法复制到剪贴板");
-        });
-    }
   }
   function createTemplate(name) {
     const tpl = {
@@ -1367,6 +1376,10 @@
     #${panelId} .dragHint::before{content:'⋮⋮';font-size:8px;color:#94a3b8;letter-spacing:-2px}
     #${panelId} #qrClose{cursor:pointer;width:auto;min-width:110px;background:#f8fafc;color:#1e293b;border:1px solid #cbd5e1;border-radius:13px;padding:10px 14px;font-size:13px;box-shadow:0 6px 18px rgba(15,23,42,.06)}
     #${panelId} #qrClose:hover{background:#eef6ff;border-color:#93c5fd;color:#0f172a}
+    #${panelId} .resize-handle{position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;background:#fff;border:2px solid #e2e8f0;border-radius:50%;display:grid;place-items:center;cursor:se-resize;box-shadow:0 4px 12px rgba(15,23,42,.12);transition:all .2s ease;z-index:10}
+    #${panelId} .resize-handle:hover{background:#f1f5f9;border-color:#94a3b8;transform:scale(1.1);box-shadow:0 6px 16px rgba(15,23,42,.16)}
+    #${panelId} .resize-handle svg{width:14px;height:14px;color:#64748b}
+    #${panelId}.resizing{cursor:se-resize;box-shadow:0 28px 80px rgba(15,23,42,.3)}
     #${panelId} .bd{padding:16px 20px 18px;display:grid;gap:12px;max-height:calc(92vh - 98px);overflow:auto;background:rgba(248,250,252,.55)}
     #${panelId} .section{display:grid;gap:12px}
     #${panelId} .sectionTitle{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800;color:#101828;margin:2px 0 0}
@@ -1391,6 +1404,7 @@
     #${panelId} .infoBox{font-size:14px;color:#334155;line-height:1.65;word-break:break-all;background:#eff8ff;border:1px solid #93c5fd;border-radius:12px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 8px 22px rgba(14,165,233,.07)}
     #${panelId} .infoIcon{width:24px;height:24px;border:2px solid #0b72d9;border-radius:999px;display:grid;place-items:center;color:#0b72d9;font-weight:900;line-height:1;flex:0 0 auto;margin-top:1px}
     #${panelId} .listSectionHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:2px}
+    #${panelId} .fieldCount{font-size:12px;font-weight:700;color:#64748b;background:#f1f5f9;padding:4px 10px;border-radius:999px}
     #${panelId} .list{display:grid;gap:10px;max-height:200px;overflow:auto;border:0;border-radius:0;padding:0;background:transparent}
     #${panelId} .item{font-size:13px;line-height:1.55;background:#fff;border:1px solid rgba(226,232,240,.95);border-radius:16px;padding:12px 14px;word-break:break-all;box-shadow:0 10px 24px rgba(15,23,42,.06);display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center}
     #${panelId} .delete-field-btn{width:28px;height:28px;border-radius:8px;border:1px solid #fee2e2;background:#fef2f2;color:#dc2626;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;line-height:1;min-height:auto;padding:0}
@@ -1428,29 +1442,37 @@
     #${panelId} .history-list::-webkit-scrollbar-track{background:#f1f5f9;border-radius:3px}
     #${panelId} .history-list::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
     #${panelId} .history-list::-webkit-scrollbar-thumb:hover{background:#94a3b8}
-    #${panelId} .history-item{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05);border:1px solid #e2e8f0}
-    #${panelId} .history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-    #${panelId} .history-time{font-size:12px;color:#94a3b8;font-family:monospace}
-    #${panelId} .history-status{font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px}
-    #${panelId} .history-status.success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
-    #${panelId} .history-status.failed{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
-    #${panelId} .history-summary{font-size:13px;color:#334155;font-weight:700;margin-bottom:6px}
-    #${panelId} .history-meta{display:flex;gap:12px;margin-bottom:10px}
-    #${panelId} .history-duration,#${panelId} .history-template{font-size:11px;color:#64748b}
-    #${panelId} .history-fields{background:#f8fafc;border-radius:8px;padding:10px}
-    #${panelId} .history-field{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;margin-bottom:4px}
+    #${panelId} .history-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:#94a3b8}
+    #${panelId} .history-empty svg{width:48px;height:48px;margin-bottom:12px;color:#cbd5e1}
+    #${panelId} .history-empty > div:first-of-type{font-size:14px;font-weight:700;color:#64748b}
+    #${panelId} .history-empty .hint{font-size:12px;color:#94a3b8;margin-top:4px}
+    #${panelId} .history-item{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(15,23,42,.06);border:1px solid #e2e8f0;transition:transform .2s ease,box-shadow .2s ease}
+    #${panelId} .history-item:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(15,23,42,.1)}
+    #${panelId} .history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    #${panelId} .history-time{display:flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;font-family:monospace}
+    #${panelId} .history-time svg{width:14px;height:14px;color:#cbd5e1}
+    #${panelId} .history-status{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;padding:4px 12px;border-radius:999px}
+    #${panelId} .history-status svg{width:14px;height:14px}
+    #${panelId} .history-status.success{background:linear-gradient(135deg,#dcfce7,#d1fae5);color:#166534;border:1px solid #bbf7d0}
+    #${panelId} .history-status.failed{background:linear-gradient(135deg,#fee2e2,#fecaca);color:#991b1b;border:1px solid #fca5a5}
+    #${panelId} .history-summary{font-size:14px;color:#1e293b;font-weight:700;margin-bottom:8px;line-height:1.4}
+    #${panelId} .history-meta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+    #${panelId} .history-duration,#${panelId} .history-template{display:flex;align-items:center;gap:4px;font-size:12px;color:#64748b;padding:4px 10px;background:#f8fafc;border-radius:8px}
+    #${panelId} .history-duration svg,#${panelId} .history-template svg{width:13px;height:13px;color:#94a3b8}
+    #${panelId} .history-fields{background:#fafbfc;border-radius:10px;padding:10px;border:1px solid #f1f5f9}
+    #${panelId} .history-field{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:5px;transition:background .15s ease}
     #${panelId} .history-field:last-child{margin-bottom:0}
     #${panelId} .history-field:hover{background:#f1f5f9}
-    #${panelId} .field-key{font-size:12px;font-weight:800;color:#1e293b;min-width:60px}
-    #${panelId} .field-status{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px}
+    #${panelId} .field-key{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#1e293b;min-width:70px}
+    #${panelId} .field-key svg{width:13px;height:13px;color:#94a3b8}
+    #${panelId} .field-status{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;min-width:50px;justify-content:center}
+    #${panelId} .field-status svg{width:12px;height:12px}
     #${panelId} .field-status.success{background:#dcfce7;color:#166534}
     #${panelId} .field-status.failed{background:#fee2e2;color:#991b1b}
     #${panelId} .field-status.skipped{background:#f3f4f6;color:#6b7280}
-    #${panelId} .field-value{font-size:12px;color:#475569;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    #${panelId} .field-duration{font-size:11px;color:#94a3b8;font-family:monospace}
-    #${panelId} .history-actions{margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0}
-    #${panelId} .history-action-btn{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer;transition:all .2s}
-    #${panelId} .history-action-btn:hover{background:#f1f5f9;color:#334155;border-color:#cbd5e1}
+    #${panelId} .field-value{font-size:13px;color:#475569;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #${panelId} .field-duration{display:flex;align-items:center;gap:3px;font-size:11px;color:#94a3b8;font-family:monospace}
+    #${panelId} .field-duration svg{width:11px;height:11px}
     /* 隐藏滚动条但保留滚动功能 */
     #${panelId} .bd::-webkit-scrollbar{display:none}
     #${panelId} .bd{-ms-overflow-style:none;scrollbar-width:none}
@@ -1501,6 +1523,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         隐藏面板
       </button>
+    </div>
+    <div class="resize-handle" id="resizeHandle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7l-5 5 5 5M7 17l5-5-5-5"/></svg>
     </div>
     <div class="bd">
       <div class="mode-tabs">
@@ -1569,7 +1594,7 @@
       <div class="section"><div class="sectionTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>测试 JSON<button id="autoGenMock" style="margin-left:auto;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;box-shadow:none;min-height:auto;cursor:pointer">🎲 自动生成</button></div><textarea id="testJson">{"111":"检测中"}</textarea></div>
       <div class="row2tight"><button id="testFill">▷ 测试填充</button><button id="genAscii" style="background:linear-gradient(135deg,#16a8e8,#0ca7a7);box-shadow:0 12px 25px rgba(13,148,136,.22)">▦ 生成 QRFILL1</button></div>
       <div class="section"><div class="sectionTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>QRFILL1 内容</div><textarea id="asciiOut" placeholder="生成的 QRFILL1 将显示在这里" readonly></textarea></div>
-      <div class="section"><div class="listSectionHead"><div class="sectionTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6"/><path d="M12 9v6"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>已绑定字段</div></div><div class="list" id="fieldList"></div></div>
+      <div class="section"><div class="listSectionHead"><div class="sectionTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6"/><path d="M12 9v6"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>已绑定字段</div><span class="fieldCount" id="fieldCount">0 个</span></div><div class="list" id="fieldList"></div></div>
       <div class="section"><div class="sectionTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>操作日志</div></div><div class="log" id="logBox"></div>
       <div class="versionFooter">
         <div class="versionLine"><span>当前版本</span><span class="versionBadge">v${APP_VERSION}</span></div>
@@ -1681,8 +1706,67 @@
     );
   }
 
+  function enablePanelResize() {
+    const resizeHandle = panel.querySelector("#resizeHandle");
+    if (!resizeHandle) return;
+    let resizing = false;
+    let startX = 0;
+    let startY = 0;
+    let startWidth = 0;
+    let startHeight = 0;
+
+    const MIN_WIDTH = 400;
+    const MAX_WIDTH = Math.min(900, window.innerWidth - 40);
+    const MIN_HEIGHT = 300;
+    const MAX_HEIGHT = window.innerHeight - 100;
+
+    resizeHandle.addEventListener("pointerdown", (event) => {
+      resizing = true;
+      const rect = panel.getBoundingClientRect();
+      startX = event.clientX;
+      startY = event.clientY;
+      startWidth = rect.width;
+      startHeight = rect.height;
+      panel.style.left = rect.left + "px";
+      panel.style.top = rect.top + "px";
+      panel.style.transform = "none";
+      panel.classList.add("resizing");
+      if (resizeHandle.setPointerCapture) resizeHandle.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    resizeHandle.addEventListener("pointermove", (event) => {
+      if (!resizing) return;
+      const deltaX = event.clientX - startX;
+      const deltaY = event.clientY - startY;
+      
+      let newWidth = Math.min(Math.max(startWidth + deltaX, MIN_WIDTH), MAX_WIDTH);
+      let newHeight = Math.min(Math.max(startHeight + deltaY, MIN_HEIGHT), MAX_HEIGHT);
+      
+      panel.style.width = newWidth + "px";
+      panel.style.height = newHeight + "px";
+      event.preventDefault();
+    });
+
+    function stopResize(event) {
+      if (!resizing) return;
+      resizing = false;
+      panel.classList.remove("resizing");
+      const rect = panel.getBoundingClientRect();
+      savePanelPosition(rect.left, rect.top);
+      try {
+        if (resizeHandle.releasePointerCapture)
+          resizeHandle.releasePointerCapture(event.pointerId);
+      } catch {}
+    }
+
+    resizeHandle.addEventListener("pointerup", stopResize);
+    resizeHandle.addEventListener("pointercancel", stopResize);
+  }
+
   applyPanelPosition(loadPanelPosition());
   enablePanelDrag();
+  enablePanelResize();
   // 默认隐藏：刷新页面后只恢复扫码监听，不打扰页面；点击插件图标再显示面板。
   panel.style.display = "none";
 
@@ -1848,6 +1932,11 @@
   function renderFields() {
     const tpl = currentTemplate();
     const box = document.getElementById("fieldList");
+    const countEl = document.getElementById("fieldCount");
+    const count = tpl?.fields?.length || 0;
+    if (countEl) {
+      countEl.textContent = `${count} 个`;
+    }
     if (!tpl || !tpl.fields.length) {
       box.innerHTML =
         '<div class="small">暂无字段绑定，先点击页面上的表单框，再输入二维码字段 key 进行绑定。</div>';
